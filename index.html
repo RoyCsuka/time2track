@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ritregistratie – simpel tooltje</title>
+    <style>
+        :root { --gap: 12px; --radius: 10px; }
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f6f7fb; color: #1f2430; }
+        header { padding: 20px; background: white; border-bottom: 1px solid #e6e7ee;}
+        .wrap { max-width: 880px; margin: 24px auto; padding: 0 16px; }
+        .card { background: white; border: 1px solid #e6e7ee; border-radius: var(--radius); padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+        .grid { display: grid; gap: var(--gap); }
+        .two { grid-template-columns: 1fr 1fr; }
+        .three { grid-template-columns: repeat(3, 1fr); }
+        label { font-size: 14px; color: #444; margin-bottom: 6px; display:block; }
+        input[type="text"], input[type="date"], input[type="number"], select {
+            width: 100%; padding: 10px 12px; border: 1px solid #d6d7df; border-radius: 8px; background: #fff; font-size: 15px;
+        }
+        .row { display: flex; gap: var(--gap); flex-wrap: wrap; align-items: center; }
+        .pill { padding: 8px 12px; border: 1px solid #d6d7df; border-radius: 999px; cursor: pointer; background: #fff; }
+        .pill input { margin-right: 8px; }
+        .muted { color:#6b7280; font-size: 12px; }
+        .btn { appearance: none; border: none; border-radius: 10px; padding: 12px 16px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #1a73e8; color: #fff; }
+        .btn-ghost { background: transparent; border: 1px solid #d6d7df; }
+        .section-title { font-weight: 700; margin: 16px 0 6px; }
+        .result { background: #0b5; color: #fff; border-radius: 10px; padding: 10px 12px; font-weight: 700; display:inline-block; }
+        .danger { color: #b00020; }
+        details.settings summary { cursor: pointer; font-weight: 600; }
+        small.code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background:#f1f3f8; padding:2px 6px; border-radius:6px; }
+    </style>
+</head>
+<body>
+<header><div class="wrap"><strong>Ritregistratie</strong> – km + reistijd</div></header>
+<main class="wrap grid" style="gap:20px;">
+
+    <details class="card settings">
+        <summary>Instellingen (eenmalig): thuis + kantoren opslaan</summary>
+        <div class="grid two" style="margin-top:12px;">
+            <div>
+                <label for="home">Thuisadres</label>
+                <input id="home" type="text" placeholder="Bijv. Straat 1, Plaats" />
+                <div class="muted">Wordt lokaal opgeslagen (localStorage).</div>
+            </div>
+            <div>
+                <label for="office1">Kantoor 1</label>
+                <input id="office1" type="text" placeholder="Kantoor 1 adres" />
+            </div>
+            <div>
+                <label for="office2">Kantoor 2</label>
+                <input id="office2" type="text" placeholder="Kantoor 2 adres" />
+            </div>
+            <div class="grid" style="align-content:end;">
+                <button class="btn btn-primary" id="saveSettings">Instellingen opslaan</button>
+                <span class="muted">Tip: gebruik Google autocomplete — kies een voorstel.</span>
+            </div>
+        </div>
+    </details>
+
+    <section class="card grid" id="form">
+        <div class="section-title">1) Reistype</div>
+        <div class="row" role="radiogroup" aria-label="Reistype">
+            <label class="pill"><input type="radio" name="mode" value="client" checked /> Naar klant afgereisd</label>
+            <label class="pill"><input type="radio" name="mode" value="commute" /> Woon-werkverkeer</label>
+        </div>
+
+        <div id="clientBlock" class="grid two">
+            <div>
+                <label for="start">Beginlocatie</label>
+                <input id="start" type="text" placeholder="Typ en kies adres…" autocomplete="off" />
+                <div class="muted">Autocomplete vult officiële adresgegevens op de achtergrond (place_id).</div>
+            </div>
+            <div>
+                <label for="end">Eindlocatie</label>
+                <input id="end" type="text" placeholder="Typ en kies adres…" autocomplete="off" />
+            </div>
+        </div>
+
+        <div id="commuteBlock" class="grid two" style="display:none;">
+            <div>
+                <label>Traject</label>
+                <select id="commuteRoute">
+                    <option value="home-office1">Thuis → Kantoor 1</option>
+                    <option value="home-office2">Thuis → Kantoor 2</option>
+                </select>
+                <div class="muted">Adressen komen uit je instellingen hierboven.</div>
+            </div>
+            <div>
+                <label for="commuteReverse">Retour (omgekeerde richting)?</label>
+                <select id="commuteReverse">
+                    <option value="no" selected>Nee</option>
+                    <option value="yes">Ja, omdraaien</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-title">2) Uren & pauze</div>
+        <div class="grid three">
+            <div>
+                <label for="date">Werkdag / datum</label>
+                <input id="date" type="date" />
+            </div>
+            <div>
+                <label for="hours">Aantal gewerkte uren</label>
+                <input id="hours" type="number" min="0" step="0.25" placeholder="bijv. 7.5" />
+            </div>
+            <div>
+                <label for="breakMin">Pauze (minuten)</label>
+                <input id="breakMin" type="number" min="0" step="5" placeholder="bijv. 30" />
+            </div>
+        </div>
+
+        <div class="row" style="justify-content:space-between; margin-top:10px;">
+            <div class="row" style="gap:8px;">
+                <button class="btn btn-ghost" id="downloadCsv" type="button">Download als CSV</button>
+                <button class="btn btn-ghost" id="sendSheets" type="button" title="Optioneel – vul Sheets URL in JS">Naar Google Sheets sturen</button>
+            </div>
+            <button class="btn btn-primary" id="calc" type="button">Bereken km + reistijd</button>
+        </div>
+
+        <div id="out" style="margin-top:12px;"></div>
+        <div id="err" class="danger" role="alert" style="margin-top:8px;"></div>
+    </section>
+
+    <section class="card">
+        <div class="section-title">Hoe werkt dit?</div>
+        <div class="muted">
+            Deze pagina gebruikt <strong>Places Autocomplete</strong> om adressen + <small class="code">place_id</small> op te halen,
+            en <strong>Distance Matrix</strong> om afstand en reistijd te berekenen. Geen server nodig.
+        </div>
+    </section>
+
+</main>
+
+<!-- Google Maps JS API (vervang met je eigen key) -->
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places" defer></script>
+<script>
+    window.addEventListener('load', () => {
+        // ====== CONFIG ======
+        const SHEETS_WEBAPP_URL = ''; // <-- vul je Apps Script webapp URL in (optioneel)
+        // ====================
+
+        const $ = (sel) => document.querySelector(sel);
+        const err = $('#err'), out = $('#out');
+        const state = {
+            places: { start: null, end: null, home: null, office1: null, office2: null },
+            lastResult: null
+        };
+
+        // Init date default = vandaag
+        $('#date').value = new Date().toISOString().slice(0,10);
+
+        // Radiogroup toggling
+        document.querySelectorAll('input[name="mode"]').forEach(r =>
+            r.addEventListener('change', () => {
+                const mode = getMode();
+                $('#clientBlock').style.display = mode === 'client' ? '' : 'none';
+                $('#commuteBlock').style.display = mode === 'commute' ? '' : 'none';
+            })
+        );
+        const getMode = () => document.querySelector('input[name="mode"]:checked').value;
+
+        // Autocomplete helpers
+        function attachAutocomplete(inputId, key) {
+            const input = document.getElementById(inputId);
+            const ac = new google.maps.places.Autocomplete(input, { fields: ['place_id','formatted_address','geometry'], types: ['geocode'] });
+            ac.addListener('place_changed', () => {
+                const place = ac.getPlace();
+                if (!place.place_id || !place.geometry) { showError('Kies een adres uit de suggesties.'); return; }
+                state.places[key] = place;
+            });
+        }
+
+        attachAutocomplete('start','start');
+        attachAutocomplete('end','end');
+        attachAutocomplete('home','home');
+        attachAutocomplete('office1','office1');
+        attachAutocomplete('office2','office2');
+
+        // Load settings from localStorage
+        const LS_KEY = 'rit.settings.v1';
+        function loadSettings() {
+            try {
+                const raw = localStorage.getItem(LS_KEY);
+                if (!raw) return;
+                const s = JSON.parse(raw);
+                ['home','office1','office2'].forEach(k => {
+                    if (s[k]?.formatted_address) {
+                        document.getElementById(k).value = s[k].formatted_address;
+                        state.places[k] = s[k];
+                    }
+                });
+            } catch {}
+        }
+        function saveSettings() {
+            const need = ['home','office1','office2'];
+            for (const k of need) {
+                if (!state.places[k]?.place_id) return showError('Instellingen: kies geldige adressen via autocomplete voor thuis en beide kantoren.');
+            }
+            localStorage.setItem(LS_KEY, JSON.stringify(state.places));
+            showMsg('Instellingen opgeslagen.');
+        }
+        loadSettings();
+        $('#saveSettings').addEventListener('click', saveSettings);
+
+        // Compute button
+        $('#calc').addEventListener('click', async () => {
+            clearMsg();
+            try {
+                const payload = await buildPayload();
+                const dm = await distanceMatrix(payload.origin, payload.destination);
+                const meters = dm.distance.value;
+                const seconds = dm.duration.value;
+
+                const km = (meters / 1000);
+                const mins = Math.round(seconds / 60);
+
+                state.lastResult = { ...payload, km: +km.toFixed(2), minutes: mins,
+                    distance_text: dm.distance.text, duration_text: dm.duration.text
+                };
+
+                renderResult(state.lastResult);
+            } catch(e) {
+                showError(e.message || String(e));
+            }
+        });
+
+        // CSV download
+        $('#downloadCsv').addEventListener('click', () => {
+            if (!state.lastResult) return showError('Eerst berekenen, daarna kun je downloaden.');
+            const r = state.lastResult;
+            const headers = ['datum','reistype','van','naar','km','reistijd_min','uren','pauze_min','van_place_id','naar_place_id'];
+            const row = [
+                r.date, r.travelType, r.origin_text, r.destination_text, r.km, r.minutes, r.hours, r.breakMin, r.origin_place_id, r.destination_place_id
+            ];
+            const csv = [headers.join(','), row.map(safeCSV).join(',')].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `rit_${r.date}.csv`;
+            a.click();
+        });
+
+        // Send to Google Sheets (optional)
+        $('#sendSheets').addEventListener('click', async () => {
+            if (!SHEETS_WEBAPP_URL) return showError('Vul eerst je Google Sheets webapp URL in de JS-config.');
+            if (!state.lastResult) return showError('Eerst berekenen, daarna kun je versturen.');
+            try {
+                const r = state.lastResult;
+                const res = await fetch(SHEETS_WEBAPP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(r)
+                });
+                if (!res.ok) throw new Error('Serverfout: ' + res.status);
+                showMsg('Verstuurd naar Google Sheets.');
+            } catch(e) { showError(e.message || String(e)); }
+        });
+
+        // Helpers
+        async function buildPayload() {
+            const date = $('#date').value;
+            const hours = parseFloat($('#hours').value || '0');
+            const breakMin = parseInt($('#breakMin').value || '0', 10);
+
+            if (!date) throw new Error('Datum is verplicht.');
+            if (Number.isNaN(hours) || hours < 0) throw new Error('Vul een geldig aantal uren in.');
+            if (Number.isNaN(breakMin) || breakMin < 0) throw new Error('Vul een geldige pauze in minuten in.');
+
+            const mode = getMode();
+            if (mode === 'client') {
+                if (!state.places.start?.place_id || !state.places.end?.place_id) {
+                    throw new Error('Kies begin- en eindlocatie via de autocomplete.');
+                }
+                return {
+                    travelType: 'naar_klant',
+                    origin: placeToRequest(state.places.start),
+                    destination: placeToRequest(state.places.end),
+                    origin_text: state.places.start.formatted_address,
+                    destination_text: state.places.end.formatted_address,
+                    origin_place_id: state.places.start.place_id,
+                    destination_place_id: state.places.end.place_id,
+                    date, hours, breakMin
+                };
+            } else {
+                // commute
+                const need = ['home','office1','office2'];
+                for (const k of need) {
+                    if (!state.places[k]?.place_id) throw new Error('Woon-werk: sla eerst thuis en beide kantoren op bij Instellingen.');
+                }
+                const route = $('#commuteRoute').value; // home-office1 / home-office2
+                const reverse = $('#commuteReverse').value === 'yes';
+                let from = route.startsWith('home') ? state.places.home : state.places.office1;
+                let to = route.endsWith('office1') ? state.places.office1 : state.places.office2;
+
+                // In dit ontwerp is route altijd home->officeX; reverse keert om.
+                if (reverse) [from, to] = [to, from];
+
+                return {
+                    travelType: 'woon_werk',
+                    origin: placeToRequest(from),
+                    destination: placeToRequest(to),
+                    origin_text: from.formatted_address,
+                    destination_text: to.formatted_address,
+                    origin_place_id: from.place_id,
+                    destination_place_id: to.place_id,
+                    date, hours, breakMin
+                };
+            }
+        }
+
+        function placeToRequest(p) {
+            // Gebruik placeIdRequest zodat Distance Matrix exact dezelfde plek pakt
+            return { placeId: p.place_id };
+        }
+
+        async function distanceMatrix(origin, destination) {
+            return new Promise((resolve, reject) => {
+                const svc = new google.maps.DistanceMatrixService();
+                svc.getDistanceMatrix({
+                    origins: [origin],
+                    destinations: [destination],
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.METRIC
+                }, (res, status) => {
+                    if (status !== 'OK') return reject(new Error('Distance Matrix error: ' + status));
+                    const row = res.rows?.[0]?.elements?.[0];
+                    if (!row || row.status !== 'OK') return reject(new Error('Geen route gevonden.'));
+                    resolve({ distance: row.distance, duration: row.duration });
+                });
+            });
+        }
+
+        function renderResult(r) {
+            out.innerHTML = `
+        <div class="grid" style="gap:8px;">
+          <div class="result">Afstand: ${r.km} km • Reistijd: ${r.minutes} min</div>
+          <div class="muted">
+            Van: ${escapeHtml(r.origin_text)}<br/>
+            Naar: ${escapeHtml(r.destination_text)}<br/>
+            Datum: ${r.date} • Uren: ${r.hours} • Pauze: ${r.breakMin} min
+          </div>
+        </div>`;
+        }
+
+        function showError(m) { err.textContent = m; }
+        function clearMsg() { err.textContent = ''; out.innerHTML = ''; }
+        function showMsg(m) { err.textContent = ''; out.innerHTML = `<span>${m}</span>`; }
+        function safeCSV(v) {
+            const s = String(v ?? '');
+            return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+        }
+        function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    });
+</script>
+</body>
+</html>
