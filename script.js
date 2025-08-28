@@ -68,11 +68,11 @@ window.addEventListener('load', () => {
         const hours=parseFloat(qs('#hours').value||'0');
         const breakMin=parseInt(qs('#breakMin').value||'0',10);
         const mode=getMode();
-        if(mode==='client'){
+        if (mode==='client') {
             if(!state.places.start||!state.places.end) throw new Error('Kies begin en eind');
             return {travelType:'klant',origin:{placeId:state.places.start.place_id},destination:{placeId:state.places.end.place_id},
                 origin_text:state.places.start.formatted_address,destination_text:state.places.end.formatted_address,date,hours,breakMin};
-        }else{
+        } else {
             const route=qs('#commuteRoute').value;
             const reverse=qs('#commuteReverse').value==='yes';
             let from=state.places.home,to=route.endsWith('1')?state.places.office1:state.places.office2;
