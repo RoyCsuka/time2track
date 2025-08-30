@@ -4,7 +4,7 @@ window.addEventListener('load', () => {
     const state = { places: {} };
 
     // Vul hier je eigen Google Apps Script WebApp URL in:
-    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbz3ZDutPR2QQr_tjJ2YeR3RgD_jmOz0T_yY4WA2WhOb6dKX1iX5kFIpfpuv5w0Zm63K/exec";
+    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/library/d/1g-aw3UYIpTgThPWwfKeQCEnIWp8t7avhKUfZDX6qYpUTGBLFZh4AdZ-F/2";
 
     // Zet datum standaard op vandaag
     document.querySelector('#date').value = new Date().toISOString().slice(0, 10);
