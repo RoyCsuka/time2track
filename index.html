@@ -16,19 +16,19 @@
     <details class="card settings">
         <summary>Instellingen (eenmalig): thuis + kantoren opslaan</summary>
         <div class="grid two" style="margin-top:12px;">
-            <div>
+            <div class="full-column">
                 <label for="home">Thuisadres</label>
                 <input id="home" type="text" placeholder="Straat 1, Plaats" />
             </div>
             <div>
-                <label for="office1">Kantoor 1</label>
-                <input id="office1" type="text" placeholder="Kantoor 1 adres" />
+                <label for="office1">1ste standaard bestemming</label>
+                <input id="office1" type="text" placeholder="Type hier het adres" />
             </div>
             <div>
-                <label for="office2">Kantoor 2</label>
-                <input id="office2" type="text" placeholder="Kantoor 2 adres" />
+                <label for="office2">2de standaard bestemming</label>
+                <input id="office2" type="text" placeholder="Type hier het adres" />
             </div>
-            <div class="grid" style="align-content:end;">
+            <div class="grid full-column">
                 <button class="btn btn-primary" id="saveSettings">Instellingen opslaan</button>
             </div>
         </div>
@@ -87,7 +87,7 @@
         </div>
 
         <div class="row" style="justify-content:space-between; margin-top:10px;">
-            <button class="btn btn-primary" id="calc" type="button">Opslaan in Google Sheet</button>
+            <button class="btn btn-primary" id="calc" type="button">time2track</button>
         </div>
 
         <div id="out" style="margin-top:12px;"></div>
