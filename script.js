@@ -3,13 +3,13 @@ window.addEventListener('load', () => {
     const out = document.querySelector('#out');
     const state = { places: {} };
 
-    // Vul hier je eigen Google Apps Script WebApp URL in:
-    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwyZLEhkb7vXBRv9M52_2WgJZnVFAIMUCNHModlhlu63P6pi4Gwkr_v3ie3sAMDa2ya/exec";
+    // 👉 Vervang dit door jouw Vercel deployment URL (dus jouwproject.vercel.app/api/proxy)
+    const SHEETS_WEBAPP_URL = "https://time2track.vercel.app/api/proxy";
 
     // Zet datum standaard op vandaag
     document.querySelector('#date').value = new Date().toISOString().slice(0, 10);
 
-    // Toggle client/commute blokken
+    // Toggle klant/woon-werk blokken
     document.querySelectorAll('input[name="mode"]').forEach(radio =>
         radio.addEventListener('change', () => {
             const mode = getMode();
@@ -69,10 +69,10 @@ window.addEventListener('load', () => {
 
             const record = { ...payload, km, mins };
 
-            // Stuur naar Google Sheets
+            // Stuur naar proxy (Vercel), die naar Google Apps Script doorstuurt
             await saveRecord(record);
 
-            showMsg("✔️ Opgeslagen in Google Sheet (" + km + " km, " + mins + " min)");
+            showMsg("✔️ Opgeslagen (" + km + " km, " + mins + " min)");
         } catch (e) {
             showError(e.message);
         }
@@ -140,14 +140,14 @@ window.addEventListener('load', () => {
         });
     }
 
-    // POST record naar Google Sheet WebApp
+    // POST record naar proxy
     async function saveRecord(record) {
         const res = await fetch(SHEETS_WEBAPP_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(record)
         });
-        if (!res.ok) throw new Error("Sheets error " + res.status);
+        if (!res.ok) throw new Error("Proxy error " + res.status);
     }
 
     // Helpers
