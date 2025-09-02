@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="nl">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <title>Ritregistratie – km + reistijd</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 <header>
@@ -502,15 +502,17 @@
         <div class="grid two" style="margin-top:12px;">
             <div class="full-column">
                 <label for="home">Thuisadres</label>
-                <input id="home" type="text" placeholder="Straat 1, Plaats" />
+                <input id="home" type="text" placeholder="Straat 1, Plaats"/>
             </div>
             <div>
                 <label for="office1">1ste standaard bestemming</label>
-                <input id="office1" type="text" placeholder="Type hier het adres" value="Livingstonehage 13, Emmeloord, Netherlands" disabled/>
+                <input id="office1" type="text" placeholder="Type hier het adres"
+                       value="Livingstonehage 13, Emmeloord, Netherlands" disabled/>
             </div>
             <div>
                 <label for="office2">2de standaard bestemming</label>
-                <input id="office2" type="text" placeholder="Type hier het adres" value="Recreatiepark De Voorst, Leemringweg, Kraggenburg, Netherlands" disabled/>
+                <input id="office2" type="text" placeholder="Type hier het adres"
+                       value="Recreatiepark De Voorst, Leemringweg, Kraggenburg, Netherlands" disabled/>
             </div>
             <div class="grid">
                 <button class="btn btn-primary" id="saveSettings">Instellingen opslaan</button>
@@ -518,83 +520,88 @@
         </div>
     </details>
 
-    <!-- Formulier -->
-    <section class="card grid" id="form">
-        <div class="section-title">1) Reistype</div>
-        <div class="row">
-            <div class="client-pill pill">
-                <input type="radio" name="mode" value="client" id="client" checked />
-                <label for="client"> Naar klant</label>
+    <!-- Ritten container -->
+    <div id="tripsContainer">
+        <!-- Eerste rit (template) -->
+        <section class="card grid trip">
+            <div class="section-title">Rit</div>
+            <div class="row">
+                <div class="pill">
+                    <input type="radio" name="mode-0" value="client" id="client-0" checked/>
+                    <label for="client-0">Naar klant</label>
+                </div>
+                <div class="pill">
+                    <input type="radio" name="mode-0" value="commute" id="commute-0"/>
+                    <label for="commute-0">Woon-werk</label>
+                </div>
             </div>
-            <div class="commute-pill pill">
-                <input type="radio" name="mode" value="commute" id="commute" />
-                <label for="commute"> Woon-werk</label>
-            </div>
-        </div>
 
-        <div id="clientBlock" class="grid three">
-            <div>
-                <label for="start">Beginlocatie</label>
-                <input id="start" type="text" placeholder="Typ en kies adres…" />
+            <div class="clientBlock grid three">
+                <div>
+                    <label for="start-0">Beginlocatie</label>
+                    <input id="start-0" type="text"/>
+                </div>
+                <div>
+                    <label for="end-0">Eindlocatie</label>
+                    <input id="end-0" type="text"/>
+                </div>
+                <div>
+                    <label for="roundtrip-0">Retour?</label>
+                    <select id="roundtrip-0">
+                        <option value="no" selected>Nee</option>
+                        <option value="yes">Ja</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label for="end">Eindlocatie</label>
-                <input id="end" type="text" placeholder="Typ en kies adres…" />
-            </div>
-            <div>
-                <label for="clientRoundtrip">Retour (heen + terug)?</label>
-                <select id="clientRoundtrip">
-                    <option value="no" selected>Nee</option>
-                    <option value="yes">Ja</option>
-                </select>
-            </div>
-        </div>
 
-        <div id="commuteBlock" class="grid two" style="display:none;">
-            <div>
-                <label>Traject</label>
-                <select id="commuteRoute">
-                    <option value="home-office1">Thuis → Emmeloord</option>
-                    <option value="home-office2">Thuis → de Voorst</option>
-                </select>
+            <div class="commuteBlock grid two" style="display:none;">
+                <div>
+                    <label for="commuteRoute-0">Traject</label>
+                    <select id="commuteRoute-0">
+                        <option value="home-office1">Thuis → Emmeloord</option>
+                        <option value="home-office2">Thuis → De Voorst</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="commuteReverse-0">Retour?</label>
+                    <select id="commuteReverse-0">
+                        <option value="no" selected>Nee</option>
+                        <option value="yes">Ja</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label for="commuteReverse">Retour?</label>
-                <select id="commuteReverse">
-                    <option value="no" selected>Nee</option>
-                    <option value="yes">Ja</option>
-                </select>
-            </div>
-        </div>
+        </section>
+    </div>
 
+    <button class="btn btn-ghost" id="addTrip" type="button">+ rit toevoegen</button>
+
+    <!-- Uren / datum -->
+    <section class="card grid">
         <div class="section-title">2) Uren & pauze</div>
         <div class="grid three">
             <div>
                 <label for="date">Datum</label>
-                <input id="date" type="date" />
+                <input id="date" type="date"/>
             </div>
             <div>
                 <label for="hours">Uren</label>
-                <input id="hours" type="number" min="0" step="0.25" />
+                <input id="hours" type="number" min="0" step="0.25"/>
             </div>
             <div>
                 <label for="breakMin">Pauze (min)</label>
-                <input id="breakMin" type="number" min="0" step="5" />
+                <input id="breakMin" type="number" min="0" step="5"/>
             </div>
         </div>
-
-        <div class="row" style="justify-content:space-between; margin-top:10px;">
-            <button class="btn btn-primary" id="calc" type="button">time2track</button>
-        </div>
-
-        <div id="out" style="margin-top:12px;"></div>
-        <div id="err" class="danger" style="margin-top:8px;"></div>
+        <button class="btn btn-primary" id="calc" type="button">Opslaan alle ritten</button>
+        <div id="out"></div>
+        <div id="err" class="danger"></div>
     </section>
 </main>
 
 <script src="script.js?v=2"></script>
 
 <!-- Google Maps API (vervang YOUR_API_KEY) -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFEiwCFKXzsxvm8k5uyoEOZrpi2XJwvH4&libraries=places" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFEiwCFKXzsxvm8k5uyoEOZrpi2XJwvH4&libraries=places" async
+        defer></script>
 </body>
 </html>
