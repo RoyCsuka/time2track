@@ -175,3 +175,28 @@ input, select {
 .danger {
     color: var(--error);
 }
+
+/* Google Autocomplete dropdown (pac-container) */
+.pac-container {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-family: inherit;
+    z-index: 99999 !important; /* zodat hij boven je formulier staat */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.pac-item {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.pac-item:hover {
+    background-color: #f5f5f5;
+}
+
+.pac-item-query {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}

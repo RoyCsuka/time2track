@@ -5,18 +5,16 @@ window.addEventListener('load', () => {
     // Vervang dit door jouw Vercel proxy URL
     const SHEETS_WEBAPP_URL = "https://time2track.vercel.app/api/proxy";
 
-    // Initialiseer autocomplete voor eerste rit
-    document.querySelectorAll('#tripsContainer .trip input[type="text"]').forEach(input => {
-        attachAutocompleteToInput(input);
-    });
-
     // Zet datum standaard op vandaag
     document.querySelector('#date').value = new Date().toISOString().slice(0, 10);
 
     // Instellingen opslaan
     document.querySelector('#saveSettings').addEventListener('click', () => {
-        const home = document.querySelector('#home').value;
-        const settings = { home };
+        const settings = {
+            home: document.querySelector('#home').value,
+            office1: document.querySelector('#office1').value,
+            office2: document.querySelector('#office2').value
+        };
         localStorage.setItem('rit.settings', JSON.stringify(settings));
         showMsg("Instellingen opgeslagen");
     });
@@ -24,13 +22,22 @@ window.addEventListener('load', () => {
     // Instellingen laden
     try {
         const saved = JSON.parse(localStorage.getItem('rit.settings'));
-        if (saved && saved.home) {
-            document.querySelector('#home').value = saved.home;
+        if (saved) {
+            if (saved.home) document.querySelector('#home').value = saved.home;
+            if (saved.office1) document.querySelector('#office1').value = saved.office1;
+            if (saved.office2) document.querySelector('#office2').value = saved.office2;
         }
     } catch {}
 
+    // Autocomplete koppelen aan instellingenvelden
+    ['#home', '#office1', '#office2'].forEach(sel => {
+        const el = document.querySelector(sel);
+        if (el) attachAutocompleteToInput(el);
+    });
+
     // Zorg dat eerste rit meteen listeners heeft
     attachModeListeners(document.querySelector('#tripsContainer .trip'), 0);
+    attachAutocompleteToTrip(document.querySelector('#tripsContainer .trip'));
 
     // + rit toevoegen
     document.querySelector('#addTrip').addEventListener('click', () => {
@@ -47,7 +54,11 @@ window.addEventListener('load', () => {
         });
 
         // velden resetten
-        clone.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+        clone.querySelectorAll('input[type="text"]').forEach(i => {
+            i.value = '';
+            i.dataset.placeId = '';
+            i.dataset.address = '';
+        });
         clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
         clone.querySelectorAll('input[type="radio"]').forEach((r, ridx) => {
             r.checked = ridx === 0; // standaard naar "klant"
@@ -56,14 +67,12 @@ window.addEventListener('load', () => {
         // default tonen clientBlock
         clone.querySelector('.clientBlock').style.display = '';
         clone.querySelector('.commuteBlock').style.display = 'none';
-        clone.querySelectorAll('input[type="text"]').forEach(input => {
-            attachAutocompleteToInput(input);
-        });
 
         container.appendChild(clone);
 
         // listeners koppelen
         attachModeListeners(clone, index);
+        attachAutocompleteToTrip(clone);
     });
 
     // Opslaan knop
@@ -86,13 +95,12 @@ window.addEventListener('load', () => {
                 let record;
 
                 if (mode === 'client') {
-                    const startInput = tripEl.querySelector(`#start-${idx}`);
-                    const endInput = tripEl.querySelector(`#end-${idx}`);
-
-                    const start = startInput.dataset.address || startInput.value;
-                    const end = endInput.dataset.address || endInput.value;
-
+                    const startEl = tripEl.querySelector(`#start-${idx}`);
+                    const endEl = tripEl.querySelector(`#end-${idx}`);
                     const retour = tripEl.querySelector(`#roundtrip-${idx}`).value === 'yes';
+
+                    const start = startEl.dataset.address || startEl.value;
+                    const end = endEl.dataset.address || endEl.value;
 
                     if (!start || !end) throw new Error("Vul begin en eind in (rit " + (idx + 1) + ")");
 
@@ -119,10 +127,10 @@ window.addEventListener('load', () => {
                     const route = tripEl.querySelector(`#commuteRoute-${idx}`).value;
                     const rev = tripEl.querySelector(`#commuteReverse-${idx}`).value === 'yes';
 
-                    // Vaste kantoren
-                    const home = document.querySelector('#home').value;
-                    const office1 = "Livingstonehage 13, Emmeloord, Netherlands";
-                    const office2 = "Recreatiepark De Voorst, Kraggenburg, Netherlands";
+                    // Vaste kantoren uit instellingen (met autocomplete)
+                    const home = document.querySelector('#home').dataset.address || document.querySelector('#home').value;
+                    const office1 = document.querySelector('#office1').dataset.address || document.querySelector('#office1').value;
+                    const office2 = document.querySelector('#office2').dataset.address || document.querySelector('#office2').value;
 
                     let from = home;
                     let to = route.endsWith('1') ? office1 : office2;
@@ -152,7 +160,8 @@ window.addEventListener('load', () => {
         }
     });
 
-    // Per rit de toggle voor klant/woonwerk activeren
+    // Helpers
+
     function attachModeListeners(tripEl, idx) {
         const radios = tripEl.querySelectorAll(`input[name="mode-${idx}"]`);
         radios.forEach(radio => {
@@ -164,7 +173,25 @@ window.addEventListener('load', () => {
         });
     }
 
-    // Distance Matrix
+    function attachAutocompleteToInput(inputEl) {
+        const ac = new google.maps.places.Autocomplete(inputEl, {
+            fields: ['place_id', 'formatted_address']
+        });
+        ac.addListener('place_changed', () => {
+            const place = ac.getPlace();
+            if (place.place_id) {
+                inputEl.dataset.placeId = place.place_id;
+                inputEl.dataset.address = place.formatted_address;
+            }
+        });
+    }
+
+    function attachAutocompleteToTrip(tripEl) {
+        tripEl.querySelectorAll('input[type="text"]').forEach(input => {
+            attachAutocompleteToInput(input);
+        });
+    }
+
     function distanceMatrix(origin, destination) {
         return new Promise((resolve, reject) => {
             const svc = new google.maps.DistanceMatrixService();
@@ -185,7 +212,6 @@ window.addEventListener('load', () => {
         });
     }
 
-    // POST record naar proxy
     async function saveRecord(record) {
         const res = await fetch(SHEETS_WEBAPP_URL, {
             method: "POST",
@@ -195,21 +221,6 @@ window.addEventListener('load', () => {
         if (!res.ok) throw new Error("Proxy error " + res.status);
     }
 
-    function attachAutocompleteToInput(inputEl) {
-        const ac = new google.maps.places.Autocomplete(inputEl, {
-            fields: ['place_id', 'formatted_address']
-        });
-        ac.addListener('place_changed', () => {
-            const place = ac.getPlace();
-            if (place.place_id) {
-                inputEl.dataset.placeId = place.place_id;
-                inputEl.dataset.address = place.formatted_address;
-            }
-        });
-    }
-
-
-    // Helpers
     function showError(m) { err.textContent = m; }
     function clearMsg() { err.textContent = ''; out.textContent = ''; }
     function showMsg(m) { err.textContent = ''; out.textContent = m; }
