@@ -540,13 +540,20 @@
                 <label for="end">Eindlocatie</label>
                 <input id="end" type="text" placeholder="Typ en kies adres…" />
             </div>
+            <div>
+                <label for="clientRoundtrip">Retour (heen + terug)?</label>
+                <select id="clientRoundtrip">
+                    <option value="no" selected>Nee</option>
+                    <option value="yes">Ja</option>
+                </select>
+            </div>
         </div>
 
         <div id="commuteBlock" class="grid two" style="display:none;">
             <div>
                 <label>Traject</label>
                 <select id="commuteRoute">
-                    <option value="home-office1">Thuis → Emmeloord (Roselie)</option>
+                    <option value="home-office1">Thuis → Emmeloord</option>
                     <option value="home-office2">Thuis → de Voorst</option>
                 </select>
             </div>

@@ -63,9 +63,14 @@ window.addEventListener('load', () => {
         clearMsg();
         try {
             const payload = await buildPayload();
-            const dm = await distanceMatrix(payload.origin, payload.destination);
-            const km = (dm.distance.value / 1000).toFixed(2);
-            const mins = Math.round(dm.duration.value / 60);
+            const totals = await getTripTotals(
+                payload.origin,
+                payload.destination,
+                Boolean(payload.retour) // true voor klant-retour, false anders
+            );
+            const km = (totals.meters / 1000).toFixed(2);
+            const mins = Math.round(totals.seconds / 60);
+
 
             const record = { ...payload, km, mins };
 
@@ -87,6 +92,8 @@ window.addEventListener('load', () => {
 
         if (mode === 'client') {
             if (!state.places.start || !state.places.end) throw new Error("Kies begin en eind");
+            const roundtrip = document.querySelector('#clientRoundtrip').value === 'yes';
+
             return {
                 travelType: 'klant',
                 date,
@@ -95,7 +102,8 @@ window.addEventListener('load', () => {
                 origin: { placeId: state.places.start.place_id },
                 destination: { placeId: state.places.end.place_id },
                 origin_text: state.places.start.formatted_address,
-                destination_text: state.places.end.formatted_address
+                destination_text: state.places.end.formatted_address,
+                retour: roundtrip // <-- NIEUW
             };
         } else {
             const route = document.querySelector('#commuteRoute').value;
@@ -139,6 +147,20 @@ window.addEventListener('load', () => {
             );
         });
     }
+
+    async function getTripTotals(origin, destination, roundtrip) {
+        const leg1 = await distanceMatrix(origin, destination);
+        let meters = leg1.distance.value;
+        let seconds = leg1.duration.value;
+
+        if (roundtrip) {
+            const leg2 = await distanceMatrix(destination, origin);
+            meters += leg2.distance.value;
+            seconds += leg2.duration.value;
+        }
+        return { meters, seconds };
+    }
+
 
     // POST record naar proxy
     async function saveRecord(record) {
