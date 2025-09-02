@@ -108,10 +108,10 @@ window.addEventListener('load', () => {
                     const leg1 = await distanceMatrix({ query: start }, { query: end });
                     let meters = leg1.distance.value;
                     let seconds = leg1.duration.value;
+
                     if (retour) {
-                        const leg2 = await distanceMatrix({ query: end }, { query: start });
-                        meters += leg2.distance.value;
-                        seconds += leg2.duration.value;
+                        meters *= 2;
+                        seconds *= 2;
                     }
 
                     record = {
@@ -125,7 +125,7 @@ window.addEventListener('load', () => {
 
                 } else {
                     const route = tripEl.querySelector(`#commuteRoute-${idx}`).value;
-                    const rev = tripEl.querySelector(`#commuteReverse-${idx}`).value === 'yes';
+                    const retour = tripEl.querySelector(`#commuteReverse-${idx}`).value === 'yes';
 
                     // Vaste kantoren uit instellingen (met autocomplete)
                     const home = document.querySelector('#home').dataset.address || document.querySelector('#home').value;
@@ -134,19 +134,26 @@ window.addEventListener('load', () => {
 
                     let from = home;
                     let to = route.endsWith('1') ? office1 : office2;
-                    if (rev) [from, to] = [to, from];
 
                     if (!from || !to) throw new Error("Thuis/kantoren niet correct ingevuld");
 
                     const leg = await distanceMatrix({ query: from }, { query: to });
+
+                    let meters = leg.distance.value;
+                    let seconds = leg.duration.value;
+
+                    if (retour) {
+                        meters *= 2;
+                        seconds *= 2;
+                    }
 
                     record = {
                         date, hours, breakMin,
                         travelType: 'woonwerk',
                         origin_text: from,
                         destination_text: to,
-                        km: (leg.distance.value / 1000).toFixed(2),
-                        mins: Math.round(leg.duration.value / 60)
+                        km: (meters / 1000).toFixed(2),
+                        mins: Math.round(seconds / 60)
                     };
                 }
 
