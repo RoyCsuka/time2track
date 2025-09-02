@@ -496,64 +496,77 @@
 </header>
 
 <main class="wrap grid" style="gap:20px;">
-
-    <!-- Ritten container -->
-    <div id="tripsContainer">
-        <!-- Eerste rit (template) -->
-        <section class="card grid trip">
-            <div class="section-title">Rit</div>
-            <div class="row">
-                <div class="pill">
-                    <input type="radio" name="mode-0" value="client" id="client-0" checked />
-                    <label for="client-0">Naar klant</label>
-                </div>
-                <div class="pill">
-                    <input type="radio" name="mode-0" value="commute" id="commute-0" />
-                    <label for="commute-0">Woon-werk</label>
-                </div>
+    <!-- Instellingen -->
+    <details class="card settings">
+        <summary>Instellingen (eenmalig): thuis + kantoren opslaan</summary>
+        <div class="grid two" style="margin-top:12px;">
+            <div class="full-column">
+                <label for="home">Thuisadres</label>
+                <input id="home" type="text" placeholder="Straat 1, Plaats" />
             </div>
-
-            <div class="clientBlock grid three">
-                <div>
-                    <label for="start-0">Beginlocatie</label>
-                    <input id="start-0" type="text" />
-                </div>
-                <div>
-                    <label for="end-0">Eindlocatie</label>
-                    <input id="end-0" type="text" />
-                </div>
-                <div>
-                    <label for="roundtrip-0">Retour?</label>
-                    <select id="roundtrip-0">
-                        <option value="no" selected>Nee</option>
-                        <option value="yes">Ja</option>
-                    </select>
-                </div>
+            <div>
+                <label for="office1">1ste standaard bestemming</label>
+                <input id="office1" type="text" placeholder="Type hier het adres" value="Livingstonehage 13, Emmeloord, Netherlands" disabled/>
             </div>
-
-            <div class="commuteBlock grid two" style="display:none;">
-                <div>
-                    <label for="commuteRoute-0">Traject</label>
-                    <select id="commuteRoute-0">
-                        <option value="home-office1">Thuis → Emmeloord</option>
-                        <option value="home-office2">Thuis → De Voorst</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="commuteReverse-0">Retour?</label>
-                    <select id="commuteReverse-0">
-                        <option value="no" selected>Nee</option>
-                        <option value="yes">Ja</option>
-                    </select>
-                </div>
+            <div>
+                <label for="office2">2de standaard bestemming</label>
+                <input id="office2" type="text" placeholder="Type hier het adres" value="Recreatiepark De Voorst, Leemringweg, Kraggenburg, Netherlands" disabled/>
             </div>
-        </section>
-    </div>
+            <div class="grid">
+                <button class="btn btn-primary" id="saveSettings">Instellingen opslaan</button>
+            </div>
+        </div>
+    </details>
 
-    <button class="btn btn-ghost" id="addTrip" type="button">+ rit toevoegen</button>
+    <!-- Formulier -->
+    <section class="card grid" id="form">
+        <div class="section-title">1) Reistype</div>
+        <div class="row">
+            <div class="client-pill pill">
+                <input type="radio" name="mode" value="client" id="client" checked />
+                <label for="client"> Naar klant</label>
+            </div>
+            <div class="commute-pill pill">
+                <input type="radio" name="mode" value="commute" id="commute" />
+                <label for="commute"> Woon-werk</label>
+            </div>
+        </div>
 
-    <!-- Uren / datum -->
-    <section class="card grid">
+        <div id="clientBlock" class="grid three">
+            <div>
+                <label for="start">Beginlocatie</label>
+                <input id="start" type="text" placeholder="Typ en kies adres…" />
+            </div>
+            <div>
+                <label for="end">Eindlocatie</label>
+                <input id="end" type="text" placeholder="Typ en kies adres…" />
+            </div>
+            <div>
+                <label for="clientRoundtrip">Retour (heen + terug)?</label>
+                <select id="clientRoundtrip">
+                    <option value="no" selected>Nee</option>
+                    <option value="yes">Ja</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="commuteBlock" class="grid two" style="display:none;">
+            <div>
+                <label>Traject</label>
+                <select id="commuteRoute">
+                    <option value="home-office1">Thuis → Emmeloord</option>
+                    <option value="home-office2">Thuis → de Voorst</option>
+                </select>
+            </div>
+            <div>
+                <label for="commuteReverse">Retour?</label>
+                <select id="commuteReverse">
+                    <option value="no" selected>Nee</option>
+                    <option value="yes">Ja</option>
+                </select>
+            </div>
+        </div>
+
         <div class="section-title">2) Uren & pauze</div>
         <div class="grid three">
             <div>
@@ -569,12 +582,15 @@
                 <input id="breakMin" type="number" min="0" step="5" />
             </div>
         </div>
-        <button class="btn btn-primary" id="calc" type="button">Opslaan alle ritten</button>
-        <div id="out"></div>
-        <div id="err" class="danger"></div>
+
+        <div class="row" style="justify-content:space-between; margin-top:10px;">
+            <button class="btn btn-primary" id="calc" type="button">time2track</button>
+        </div>
+
+        <div id="out" style="margin-top:12px;"></div>
+        <div id="err" class="danger" style="margin-top:8px;"></div>
     </section>
 </main>
-
 
 <script src="script.js?v=2"></script>
 
