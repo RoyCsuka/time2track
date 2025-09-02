@@ -5,6 +5,11 @@ window.addEventListener('load', () => {
     // Vervang dit door jouw Vercel proxy URL
     const SHEETS_WEBAPP_URL = "https://time2track.vercel.app/api/proxy";
 
+    // Initialiseer autocomplete voor eerste rit
+    document.querySelectorAll('#tripsContainer .trip input[type="text"]').forEach(input => {
+        attachAutocompleteToInput(input);
+    });
+
     // Zet datum standaard op vandaag
     document.querySelector('#date').value = new Date().toISOString().slice(0, 10);
 
@@ -51,6 +56,9 @@ window.addEventListener('load', () => {
         // default tonen clientBlock
         clone.querySelector('.clientBlock').style.display = '';
         clone.querySelector('.commuteBlock').style.display = 'none';
+        clone.querySelectorAll('input[type="text"]').forEach(input => {
+            attachAutocompleteToInput(input);
+        });
 
         container.appendChild(clone);
 
@@ -78,8 +86,12 @@ window.addEventListener('load', () => {
                 let record;
 
                 if (mode === 'client') {
-                    const start = tripEl.querySelector(`#start-${idx}`).value;
-                    const end = tripEl.querySelector(`#end-${idx}`).value;
+                    const startInput = tripEl.querySelector(`#start-${idx}`);
+                    const endInput = tripEl.querySelector(`#end-${idx}`);
+
+                    const start = startInput.dataset.address || startInput.value;
+                    const end = endInput.dataset.address || endInput.value;
+
                     const retour = tripEl.querySelector(`#roundtrip-${idx}`).value === 'yes';
 
                     if (!start || !end) throw new Error("Vul begin en eind in (rit " + (idx + 1) + ")");
@@ -182,6 +194,20 @@ window.addEventListener('load', () => {
         });
         if (!res.ok) throw new Error("Proxy error " + res.status);
     }
+
+    function attachAutocompleteToInput(inputEl) {
+        const ac = new google.maps.places.Autocomplete(inputEl, {
+            fields: ['place_id', 'formatted_address']
+        });
+        ac.addListener('place_changed', () => {
+            const place = ac.getPlace();
+            if (place.place_id) {
+                inputEl.dataset.placeId = place.place_id;
+                inputEl.dataset.address = place.formatted_address;
+            }
+        });
+    }
+
 
     // Helpers
     function showError(m) { err.textContent = m; }
