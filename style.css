@@ -46,6 +46,7 @@ header {
 
     summary {
         padding: 16px;
+        cursor: pointer;
     }
 }
 
@@ -104,7 +105,6 @@ input, select {
 }
 
 .pill {
-    border: 1px solid var(--border);
     cursor: pointer;
     position: relative;
     display: flex;
@@ -133,9 +133,9 @@ input, select {
     }
 
     label {
+        border: 1px solid var(--border);
         background: #fff;
         padding: 10px 20px;
-        border: 1px solid var(--border);
         border-radius: 999px;
         margin-bottom: 0;
     }
