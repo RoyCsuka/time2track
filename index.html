@@ -28,7 +28,7 @@
                 <label for="office2">2de standaard bestemming</label>
                 <input id="office2" type="text" placeholder="Type hier het adres" />
             </div>
-            <div class="grid full-column">
+            <div class="grid">
                 <button class="btn btn-primary" id="saveSettings">Instellingen opslaan</button>
             </div>
         </div>
@@ -38,8 +38,14 @@
     <section class="card grid" id="form">
         <div class="section-title">1) Reistype</div>
         <div class="row">
-            <label class="pill"><input type="radio" name="mode" value="client" checked /> Naar klant</label>
-            <label class="pill"><input type="radio" name="mode" value="commute" /> Woon-werk</label>
+            <div class="client-pill pill">
+                <input type="radio" name="mode" value="client" id="client" checked />
+                <label for="client"> Naar klant</label>
+            </div>
+            <div class="commute-pill pill">
+                <input type="radio" name="mode" value="commute" id="commute" />
+                <label for="commute"> Woon-werk</label>
+            </div>
         </div>
 
         <div id="clientBlock" class="grid two">
