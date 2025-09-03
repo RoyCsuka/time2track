@@ -35,7 +35,7 @@ window.addEventListener('load', () => {
         if (el) attachAutocompleteToInput(el);
     });
 
-    // Zorg dat eerste rit meteen listeners heeft
+    // Zorg dat eerste rit meteen listeners + autocomplete heeft
     attachModeListeners(document.querySelector('#tripsContainer .trip'), 0);
     attachAutocompleteToTrip(document.querySelector('#tripsContainer .trip'));
 
@@ -59,6 +59,7 @@ window.addEventListener('load', () => {
             i.dataset.placeId = '';
             i.dataset.address = '';
         });
+        clone.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
         clone.querySelectorAll('input[type="radio"]').forEach((r, ridx) => {
             r.checked = ridx === 0; // standaard naar "klant"
@@ -70,7 +71,7 @@ window.addEventListener('load', () => {
 
         container.appendChild(clone);
 
-        // listeners koppelen
+        // listeners + autocomplete koppelen
         attachModeListeners(clone, index);
         attachAutocompleteToTrip(clone);
     });
@@ -97,7 +98,8 @@ window.addEventListener('load', () => {
                 if (mode === 'client') {
                     const startEl = tripEl.querySelector(`#start-${idx}`);
                     const endEl = tripEl.querySelector(`#end-${idx}`);
-                    const retour = tripEl.querySelector(`#roundtrip-${idx}`).value === 'yes';
+                    // ✅ checkbox
+                    const retour = tripEl.querySelector(`#roundtrip-${idx}`).checked;
 
                     const start = startEl.dataset.address || startEl.value;
                     const end = endEl.dataset.address || endEl.value;
@@ -117,6 +119,7 @@ window.addEventListener('load', () => {
                     record = {
                         date, hours, breakMin,
                         travelType: 'klant',
+                        retour: retour ? 'ja' : 'nee',
                         origin_text: start,
                         destination_text: end,
                         km: (meters / 1000).toFixed(2),
@@ -125,7 +128,8 @@ window.addEventListener('load', () => {
 
                 } else {
                     const route = tripEl.querySelector(`#commuteRoute-${idx}`).value;
-                    const retour = tripEl.querySelector(`#commuteReverse-${idx}`).value === 'yes';
+                    // ✅ checkbox
+                    const retour = tripEl.querySelector(`#commuteReverse-${idx}`).checked;
 
                     // Vaste kantoren uit instellingen (met autocomplete)
                     const home = document.querySelector('#home').dataset.address || document.querySelector('#home').value;
@@ -150,10 +154,11 @@ window.addEventListener('load', () => {
                     record = {
                         date, hours, breakMin,
                         travelType: 'woonwerk',
+                        retour: retour ? 'ja' : 'nee',
                         origin_text: from,
                         destination_text: to,
                         km: (meters / 1000).toFixed(2),
-                        mins: Math.round(seconds / 60)
+                        mins: Math.round(seconds / 60)  // ✅ gebruikt verdubbelde seconds
                     };
                 }
 
@@ -161,7 +166,7 @@ window.addEventListener('load', () => {
                 saved++;
             }
 
-            showMsg(`✔️ ${saved} ritten opgeslagen in Google Sheet`);
+            showMsg(`✔️ ${saved} tracks & time opgeslagen!`);
         } catch (e) {
             showError(e.message);
         }
