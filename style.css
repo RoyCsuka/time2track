@@ -88,6 +88,7 @@ summary {
 .flex {
     display: flex;
     flex-direction: column;
+    gap: var(--gap);
 
     > div {
         flex: 1;
