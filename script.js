@@ -82,8 +82,10 @@ window.addEventListener('load', () => {
         try {
             const date = document.querySelector('#date').value;
             const clientName = (document.querySelector('#client')?.value || '').trim();
-            const hours = parseFloat(document.querySelector('#hours').value || '0');
-            const breakMin = parseInt(document.querySelector('#breakMin').value || '0', 10);
+
+            // Let op: uren/pauze zijn globaal voor de hele batch, sturen we alleen mee op de 1e rij
+            const hoursGlobal = parseFloat(document.querySelector('#hours').value || '0');
+            const breakMinGlobal = parseInt(document.querySelector('#breakMin').value || '0', 10);
 
             const tripsEls = document.querySelectorAll('#tripsContainer .trip');
             if (tripsEls.length === 0) throw new Error("Geen ritten ingevoerd");
@@ -94,12 +96,17 @@ window.addEventListener('load', () => {
                 const tripEl = tripsEls[idx];
                 const mode = tripEl.querySelector(`input[name="mode-${idx}"]:checked`).value;
 
+                // Alleen op de eerste rij meesturen; anders leeg
+                const includeGlobals = (idx === 0);
+                const hours = includeGlobals ? hoursGlobal : '';
+                const breakMin = includeGlobals ? breakMinGlobal : '';
+                const clientForRow = includeGlobals ? clientName : '';
+
                 let record;
 
                 if (mode === 'client') {
                     const startEl = tripEl.querySelector(`#start-${idx}`);
                     const endEl = tripEl.querySelector(`#end-${idx}`);
-                    // ✅ checkbox
                     const retour = tripEl.querySelector(`#roundtrip-${idx}`).checked;
 
                     const start = startEl.dataset.address || startEl.value;
@@ -118,8 +125,10 @@ window.addEventListener('load', () => {
                     }
 
                     record = {
-                        date, hours, breakMin,
-                        client: clientName,
+                        date,
+                        hours,
+                        breakMin,
+                        client: clientForRow,
                         travelType: 'klant',
                         retour: retour ? 'ja' : 'nee',
                         origin_text: start,
@@ -130,7 +139,6 @@ window.addEventListener('load', () => {
 
                 } else {
                     const route = tripEl.querySelector(`#commuteRoute-${idx}`).value;
-                    // ✅ checkbox
                     const retour = tripEl.querySelector(`#commuteReverse-${idx}`).checked;
 
                     // Vaste kantoren uit instellingen (met autocomplete)
@@ -154,14 +162,16 @@ window.addEventListener('load', () => {
                     }
 
                     record = {
-                        date, hours, breakMin,
-                        client: clientName,
+                        date,
+                        hours,
+                        breakMin,
+                        client: clientForRow,
                         travelType: 'woonwerk',
                         retour: retour ? 'ja' : 'nee',
                         origin_text: from,
                         destination_text: to,
                         km: (meters / 1000).toFixed(2),
-                        mins: Math.round(seconds / 60)  // ✅ gebruikt verdubbelde seconds
+                        mins: Math.round(seconds / 60)
                     };
                 }
 
@@ -169,7 +179,7 @@ window.addEventListener('load', () => {
                 saved++;
             }
 
-            showMsg(`✔️ ${saved} tracks & time opgeslagen!`);
+            showMsg(`✔️ ${saved} ritten opgeslagen in Google Sheet`);
         } catch (e) {
             showError(e.message);
         }
