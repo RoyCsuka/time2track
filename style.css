@@ -33,6 +33,11 @@ header {
     padding: 0 16px;
 }
 
+#tripsContainer {
+    position: relative;
+    padding-bottom: 80px;
+}
+
 .card {
     background: white;
     border: 1px solid #ddd;
@@ -129,6 +134,9 @@ input, select {
 }
 
 .btn-ghost {
+    position: absolute;
+    bottom: 16px;
+    left: 0;
     background: none;
     border: none;
     width: 100%;
