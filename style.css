@@ -2,6 +2,7 @@
     --gap: 12px;
     --radius: 10px;
     --primary: transparent linear-gradient(132deg, #6037AE 0%, #2D33C7 100%) 0% 0% no-repeat padding-box;
+    --secondary: #6037AE;
     --border: #2D33C7;
     --confirm: #0b5;
     --error: #f44336;
