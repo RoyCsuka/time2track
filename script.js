@@ -98,9 +98,9 @@ window.addEventListener('load', () => {
 
                 // Alleen op de eerste rij meesturen; anders leeg
                 const includeGlobals = (idx === 0);
-                const hours = includeGlobals ? hoursGlobal : '';
-                const breakMin = includeGlobals ? breakMinGlobal : '';
-                const clientForRow = includeGlobals ? clientName : '';
+                const hours = includeGlobals ? hoursGlobal : null;
+                const breakMin = includeGlobals ? breakMinGlobal : null;
+                const clientForRow = includeGlobals ? clientName : null;
 
                 let record;
 
