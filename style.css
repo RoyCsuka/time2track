@@ -77,12 +77,31 @@ summary {
     }
 }
 
-.two {
+.grid.two {
     grid-template-columns: 1fr 1fr;
 }
 
-.three {
+.grid.three {
     grid-template-columns: repeat(3, 1fr);
+}
+
+@media screen and (min-width: 768px) {
+    .flex {
+        flex-direction: row;
+    }
+}
+
+.flex {
+    display: flex;
+    flex-direction: column;
+
+    > div {
+        flex: 1;
+
+        &:last-child {
+            flex: 0;
+        }
+    }
 }
 
 label {
