@@ -85,12 +85,6 @@ summary {
     grid-template-columns: repeat(3, 1fr);
 }
 
-@media screen and (min-width: 768px) {
-    .flex {
-        flex-direction: row;
-    }
-}
-
 .flex {
     display: flex;
     flex-direction: column;
@@ -101,6 +95,12 @@ summary {
         &:last-child {
             flex: 0;
         }
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .flex {
+        flex-direction: row;
     }
 }
 
