@@ -81,6 +81,7 @@ window.addEventListener('load', () => {
         clearMsg();
         try {
             const date = document.querySelector('#date').value;
+            const clientName = (document.querySelector('#client')?.value || '').trim();
             const hours = parseFloat(document.querySelector('#hours').value || '0');
             const breakMin = parseInt(document.querySelector('#breakMin').value || '0', 10);
 
@@ -118,6 +119,7 @@ window.addEventListener('load', () => {
 
                     record = {
                         date, hours, breakMin,
+                        client: clientName,
                         travelType: 'klant',
                         retour: retour ? 'ja' : 'nee',
                         origin_text: start,
@@ -153,6 +155,7 @@ window.addEventListener('load', () => {
 
                     record = {
                         date, hours, breakMin,
+                        client: clientName,
                         travelType: 'woonwerk',
                         retour: retour ? 'ja' : 'nee',
                         origin_text: from,
