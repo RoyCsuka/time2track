@@ -63,47 +63,46 @@ window.addEventListener('load', () => {
     }
 
     // + rit toevoegen
-    const addBtn = document.querySelector('#addTrip');
-    if (addBtn) {
-        addBtn.addEventListener('click', () => {
-            const container = document.querySelector('#tripsContainer');
-            if (!container || !container.children.length) return;
-            const index = container.children.length;
-            const clone = container.children[0].cloneNode(true);
+    // + rit toevoegen  ✅ gefixt: index telt alleen .trip, niet de knop
+    document.querySelector('#addTrip').addEventListener('click', () => {
+        const container = document.querySelector('#tripsContainer');
+        const index = container.querySelectorAll('.trip').length; // <-- in plaats van children.length
+        const clone = container.querySelector('.trip').cloneNode(true);
 
-            // ids/names aanpassen waar mogelijk (alleen als ze -0 bevatten)
-            clone.querySelectorAll('[id]').forEach(el => {
-                if (el.id.includes('-0')) el.id = el.id.replace('-0', '-' + index);
-            });
-            clone.querySelectorAll('[name]').forEach(el => {
-                if (el.name.includes('-0')) el.name = el.name.replace('-0', '-' + index);
-            });
-
-            // velden resetten
-            clone.querySelectorAll('input[type="text"]').forEach(i => {
-                i.value = '';
-                i.dataset.placeId = '';
-                i.dataset.address = '';
-            });
-            clone.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-            // standaard 1e radio aan
-            const radios = clone.querySelectorAll('input[type="radio"]');
-            radios.forEach((r, ridx) => { r.checked = ridx === 0; });
-
-            // default tonen clientBlock
-            const cb = clone.querySelector('.clientBlock');
-            const wb = clone.querySelector('.commuteBlock');
-            if (cb) cb.style.display = '';
-            if (wb) wb.style.display = 'none';
-
-            container.appendChild(clone);
-
-            // listeners + autocomplete koppelen
-            attachModeListeners(clone, index);
-            attachAutocompleteToTrip(clone);
+        // ids/names aanpassen (alleen die met -0 suffix)
+        clone.querySelectorAll('[id]').forEach(el => {
+            if (el.id.includes('-0')) el.id = el.id.replace('-0', '-' + index);
         });
-    }
+        clone.querySelectorAll('[name]').forEach(el => {
+            if (el.name.includes('-0')) el.name = el.name.replace('-0', '-' + index);
+        });
+
+        // velden resetten
+        clone.querySelectorAll('input[type="text"]').forEach(i => {
+            i.value = '';
+            i.dataset.placeId = '';
+            i.dataset.address = '';
+        });
+        clone.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+        clone.querySelectorAll('input[type="radio"]').forEach((r, ridx) => {
+            r.checked = ridx === 0; // standaard "Naar klant"
+        });
+
+        // default: klant-blok zichtbaar
+        const cb = clone.querySelector('.clientBlock');
+        const wb = clone.querySelector('.commuteBlock');
+        if (cb) cb.style.display = '';
+        if (wb) wb.style.display = 'none';
+
+        // plaats vóór de knop, zodat volgorde netjes blijft
+        const addBtn = document.querySelector('#addTrip');
+        container.insertBefore(clone, addBtn);
+
+        // listeners + autocomplete koppelen
+        attachModeListeners(clone, index);
+        attachAutocompleteToTrip(clone);
+    });
 
     // Opslaan knop
     const calcBtn = document.querySelector('#calc');
