@@ -563,21 +563,21 @@
                 </div>
             </div>
         </section>
+        <button class="btn btn-ghost" id="addTrip" type="button">+ rit toevoegen</button>
     </div>
 
-    <button class="btn btn-ghost" id="addTrip" type="button">+ rit toevoegen</button>
 
     <!-- Uren / datum -->
     <section class="card grid">
         <div class="section-title">2) Klant, uren & pauze</div>
         <div class="grid two">
             <div>
-                <label for="client">Klant</label>
-                <input id="client" type="text"/>
-            </div>
-            <div>
                 <label for="date">Datum</label>
                 <input id="date" type="date"/>
+            </div>
+            <div>
+                <label for="client">Klant</label>
+                <input id="client" type="text"/>
             </div>
             <div>
                 <label for="hours">Uren</label>
@@ -587,8 +587,8 @@
                 <label for="breakMin">Pauze (min)</label>
                 <input id="breakMin" type="number" min="0" step="5"/>
             </div>
+            <button class="btn btn-primary" id="calc" type="button">Opslaan alle ritten</button>
         </div>
-        <button class="btn btn-primary" id="calc" type="button">Opslaan alle ritten</button>
         <div id="out"></div>
         <div id="err" class="danger"></div>
     </section>
