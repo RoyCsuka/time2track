@@ -129,6 +129,8 @@ input, select {
 }
 
 .btn-ghost {
+    background: none;
+    border: none;
     width: 100%;
     text-align: center;
     margin-top: var(--gap);
