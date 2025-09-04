@@ -1,5 +1,5 @@
 window.addEventListener('load', () => {
-    console.log('NEW')
+    console.log('NEW v2')
     // ===== DEBUG SWITCH =====
     const DEBUG = true;
     // grp is nu ASYNC en await zijn payload
