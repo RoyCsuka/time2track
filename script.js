@@ -1,8 +1,14 @@
 window.addEventListener('load', () => {
+    console.log('NEW')
     // ===== DEBUG SWITCH =====
     const DEBUG = true;
+    // grp is nu ASYNC en await zijn payload
     const dbg = (...args) => { if (DEBUG) console.log('[T2T]', ...args); };
-    const grp = (label, fn) => { if (!DEBUG) return fn(); console.group(label); try { fn(); } finally { console.groupEnd(); } };
+    const grp = async (label, fn) => {
+        if (!DEBUG) return await fn();
+        console.group(label);
+        try { return await fn(); } finally { console.groupEnd(); }
+    };
     const warn = (...args) => { if (DEBUG) console.warn('[T2T]', ...args); };
 
     const err = document.querySelector('#err');
@@ -50,21 +56,19 @@ window.addEventListener('load', () => {
                 office2: (document.querySelector('#office2') || {}).value || ''
             };
             localStorage.setItem('rit.settings', JSON.stringify(settings));
-            grp('Instellingen opgeslagen', () => dbg(settings));
+            dbg('Instellingen opgeslagen', settings);
             showMsg("Instellingen opgeslagen");
         });
     }
 
     try {
         const saved = JSON.parse(localStorage.getItem('rit.settings'));
-        grp('Instellingen laden', () => {
-            dbg('raw localStorage', saved);
-            if (saved) {
-                if (saved.home && document.querySelector('#home')) document.querySelector('#home').value = saved.home;
-                if (saved.office1 && document.querySelector('#office1')) document.querySelector('#office1').value = saved.office1;
-                if (saved.office2 && document.querySelector('#office2')) document.querySelector('#office2').value = saved.office2;
-            }
-        });
+        dbg('Instellingen laden →', saved);
+        if (saved) {
+            if (saved.home && document.querySelector('#home')) document.querySelector('#home').value = saved.home;
+            if (saved.office1 && document.querySelector('#office1')) document.querySelector('#office1').value = saved.office1;
+            if (saved.office2 && document.querySelector('#office2')) document.querySelector('#office2').value = saved.office2;
+        }
     } catch (e) {
         warn('Instellingen parse fout', e);
     }
@@ -84,67 +88,53 @@ window.addEventListener('load', () => {
         warn('Geen eerste .trip gevonden');
     }
 
-    // ===== Rit toevoegen (let op: index op basis van aantal .trip secties) =====
+    // ===== Rit toevoegen (index = aantal .trip secties, niet children.length) =====
     const addBtn = document.querySelector('#addTrip');
     if (addBtn) {
         addBtn.addEventListener('click', () => {
             const container = document.querySelector('#tripsContainer');
             const addBtnRef = document.querySelector('#addTrip');
             if (!container) return warn('#tripsContainer niet gevonden');
-            const index = container.querySelectorAll('.trip').length; // cruciaal: telt niet de knop mee
+            const index = container.querySelectorAll('.trip').length; // cruciaal
             const template = container.querySelector('.trip');
             if (!template) return warn('Geen .trip template');
 
-            grp(`Rit klonen -> index ${index}`, () => {
-                const clone = template.cloneNode(true);
+            const clone = template.cloneNode(true);
 
-                // ids/names aanpassen waar ze -0 bevatten
-                clone.querySelectorAll('[id]').forEach(el => {
-                    if (el.id.includes('-0')) {
-                        const newId = el.id.replace('-0', '-' + index);
-                        dbg('id:', el.id, '=>', newId);
-                        el.id = newId;
-                    } else {
-                        dbg('id blijft:', el.id);
-                    }
-                });
-                clone.querySelectorAll('[name]').forEach(el => {
-                    if (el.name.includes('-0')) {
-                        const newName = el.name.replace('-0', '-' + index);
-                        dbg('name:', el.name, '=>', newName);
-                        el.name = newName;
-                    } else {
-                        dbg('name blijft:', el.name);
-                    }
-                });
-
-                // velden resetten
-                clone.querySelectorAll('input[type="text"]').forEach(i => {
-                    i.value = '';
-                    i.dataset.placeId = '';
-                    i.dataset.address = '';
-                });
-                clone.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-                clone.querySelectorAll('input[type="radio"]').forEach((r, ridx) => {
-                    r.checked = ridx === 0; // standaard "Naar klant"
-                });
-
-                // clientBlock tonen, commuteBlock verbergen
-                const cb = clone.querySelector('.clientBlock');
-                const wb = clone.querySelector('.commuteBlock');
-                if (cb) cb.style.display = '';
-                if (wb) wb.style.display = 'none';
-
-                // Insert vóór de knop
-                container.insertBefore(clone, addBtnRef);
-
-                // listeners + autocomplete koppelen
-                attachModeListeners(clone, index);
-                attachAutocompleteToTrip(clone);
-
-                dbg('Nieuwe trip toegevoegd met index', index);
+            // ids/names aanpassen waar ze -0 bevatten
+            clone.querySelectorAll('[id]').forEach(el => {
+                if (el.id.includes('-0')) el.id = el.id.replace('-0', '-' + index);
             });
+            clone.querySelectorAll('[name]').forEach(el => {
+                if (el.name.includes('-0')) el.name = el.name.replace('-0', '-' + index);
+            });
+
+            // velden resetten
+            clone.querySelectorAll('input[type="text"]').forEach(i => {
+                i.value = '';
+                i.dataset.placeId = '';
+                i.dataset.address = '';
+            });
+            clone.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+            clone.querySelectorAll('input[type="radio"]').forEach((r, ridx) => {
+                r.checked = ridx === 0; // standaard "Naar klant"
+            });
+
+            // clientBlock tonen, commuteBlock verbergen
+            const cb = clone.querySelector('.clientBlock');
+            const wb = clone.querySelector('.commuteBlock');
+            if (cb) cb.style.display = '';
+            if (wb) wb.style.display = 'none';
+
+            // Insert vóór de knop
+            container.insertBefore(clone, addBtnRef);
+
+            // listeners + autocomplete koppelen
+            attachModeListeners(clone, index);
+            attachAutocompleteToTrip(clone);
+
+            dbg('Nieuwe trip toegevoegd met index', index);
         });
     }
 
@@ -153,8 +143,9 @@ window.addEventListener('load', () => {
     if (calcBtn) {
         calcBtn.addEventListener('click', async () => {
             clearMsg();
-            grp('Submit batch start', async () => {
-                try {
+            try {
+                // ⬇️ NU WEL AWAITEN: hele batch in één async group
+                await grp('Submit batch start', async () => {
                     const date = (document.querySelector('#date') || {}).value || '';
                     const clientName = (document.querySelector('#client') || {}).value?.trim?.() || '';
                     const hoursGlobal = parseFloat((document.querySelector('#hours') || {}).value || '0');
@@ -193,7 +184,8 @@ window.addEventListener('load', () => {
                             const end   = endEl.dataset.address || endEl.value;
                             if (!start || !end) throw new Error(`Vul begin en eind in (rit ${idx + 1})`);
 
-                            grp(`Trip ${idx} afstand berekenen (klant)`, async () => {
+                            // ⬇️ NU WEL AWAITEN
+                            await grp(`Trip ${idx} afstand berekenen (klant)`, async () => {
                                 dbg('Start/End', { start, end, retour });
                                 const leg1 = await distanceMatrix({ query: start }, { query: end });
                                 let meters = leg1.distance.value;
@@ -239,7 +231,8 @@ window.addEventListener('load', () => {
 
                             if (!from || !to) throw new Error("Thuis/kantoren niet correct ingevuld");
 
-                            grp(`Trip ${idx} afstand berekenen (woon-werk)`, async () => {
+                            // ⬇️ NU WEL AWAITEN
+                            await grp(`Trip ${idx} afstand berekenen (woon-werk)`, async () => {
                                 dbg('Route', { routeVal, from, to, retour });
                                 const leg = await distanceMatrix({ query: from }, { query: to });
 
@@ -268,23 +261,21 @@ window.addEventListener('load', () => {
                             });
                         }
 
-                        // Wacht tot record is opgebouwd (groepjes zijn sync gelopen)
                         if (!record) throw new Error(`Record niet opgebouwd (rit ${idx + 1})`);
 
-                        grp(`Trip ${idx} → payload`, () => dbg(record));
+                        dbg(`Trip ${idx} → payload`, record);
 
-                        // Verstuur
                         const res = await saveRecord(record);
                         dbg(`Trip ${idx} opgeslagen`, res);
                         saved++;
                     }
 
                     showMsg(`✔️ ${saved} ritten opgeslagen in Google Sheet`);
-                } catch (e) {
-                    showError(e.message);
-                    warn('Submit error', e);
-                }
-            });
+                });
+            } catch (e) {
+                showError(e.message);
+                warn('Submit error', e);
+            }
         });
     }
 
@@ -368,16 +359,15 @@ window.addEventListener('load', () => {
 
     // ===== POST record naar proxy (met logging) =====
     async function saveRecord(record) {
-        grp('fetch → proxy', () => dbg('URL', SHEETS_WEBAPP_URL, 'BODY', record));
+        dbg('fetch → proxy', { URL: SHEETS_WEBAPP_URL, BODY: record });
         const res = await fetch(SHEETS_WEBAPP_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(record)
         });
         const text = await res.text();
-        grp('proxy response', () => dbg('status', res.status, 'text', text));
+        dbg('proxy response', { status: res.status, text });
         if (!res.ok) throw new Error("Proxy error " + res.status + ' ' + text);
-        // probeer JSON te parsen, zoniet geef tekst terug
         try { return JSON.parse(text); } catch { return { raw: text }; }
     }
 
